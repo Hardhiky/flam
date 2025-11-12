@@ -130,7 +130,8 @@ class CameraManager(private val context: Context) {
             val bufferSize = width * height * 4 // RGBA
             if (processedFrameBuffer == null ||
                 frameWidth != width ||
-                frameHeight != height) {
+                frameHeight != height
+            ) {
                 processedFrameBuffer = ByteArray(bufferSize)
                 frameWidth = width
                 frameHeight = height

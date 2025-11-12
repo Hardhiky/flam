@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.flam.edgedetector.camera.CameraManager
 import com.flam.edgedetector.gl.GLRenderer
+import com.flam.edgedetector.network.WebSocketFrameStreamer
 import com.google.android.material.button.MaterialButton
 import android.opengl.GLSurfaceView
 import android.widget.ProgressBar
@@ -43,9 +44,11 @@ class MainActivity : AppCompatActivity() {
     // Core components
     private lateinit var glRenderer: GLRenderer
     private lateinit var cameraManager: CameraManager
+    private lateinit var webSocketStreamer: WebSocketFrameStreamer
 
     private var isOpenGLInitialized = false
     private var isCameraInitialized = false
+    private var isWebSocketEnabled = true // Toggle this to enable/disable streaming
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         initializeViews()
         initializeNativeLib()
+        initializeWebSocket()
         checkPermissions()
     }
 
@@ -106,6 +110,70 @@ class MainActivity : AppCompatActivity() {
                 this,
                 getString(R.string.opencv_not_available),
                 Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    /**
+     * Initialize WebSocket streamer for web viewer
+     */
+    private fun initializeWebSocket() {
+        if (!isWebSocketEnabled) {
+            Log.i(TAG, "WebSocket streaming disabled")
+            return
+        }
+
+        try {
+            // IMPORTANT: Change this IP to your PC's IP address on the same network
+            // Find your PC's IP: Windows: ipconfig | Mac/Linux: ifconfig
+            val serverUrl = "ws://192.168.1.101" // <-- CHANGE THIS TO YOUR PC'S IP
+
+            webSocketStreamer = WebSocketFrameStreamer(serverUrl)
+
+            // Set up callbacks
+            webSocketStreamer.onConnected = {
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        "✅ Connected to Web Viewer",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.i(TAG, "WebSocket connected - Live streaming active")
+                }
+            }
+
+            webSocketStreamer.onDisconnected = {
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        "⚠️ Disconnected from Web Viewer",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.w(TAG, "WebSocket disconnected")
+                }
+            }
+
+            webSocketStreamer.onError = { error ->
+                runOnUiThread {
+                    Log.e(TAG, "WebSocket error: $error")
+                }
+            }
+
+            webSocketStreamer.onMessageReceived = { message ->
+                Log.d(TAG, "WebSocket message: $message")
+            }
+
+            // Connect to server
+            webSocketStreamer.connect()
+
+            Log.i(TAG, "WebSocket streamer initialized: $serverUrl")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize WebSocket: ${e.message}", e)
+            Toast.makeText(
+                this,
+                "WebSocket init failed - streaming disabled",
+                Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -202,6 +270,18 @@ class MainActivity : AppCompatActivity() {
                 if (isOpenGLInitialized) {
                     // Update OpenGL texture with processed frame
                     glRenderer.setFrameData(frameData, width, height)
+
+                    // Send frame to web viewer via WebSocket
+                    if (isWebSocketEnabled && ::webSocketStreamer.isInitialized) {
+                        val currentMode = cameraManager.getProcessingMode()
+                        webSocketStreamer.sendFrame(
+                            frameData,
+                            width,
+                            height,
+                            currentMode,
+                            processingTime
+                        )
+                    }
 
                     // Update UI on main thread
                     runOnUiThread {
@@ -355,6 +435,12 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
 
+        // Release WebSocket streamer
+        if (::webSocketStreamer.isInitialized) {
+            Log.i(TAG, webSocketStreamer.getStats())
+            webSocketStreamer.release()
+        }
+
         // Release camera
         if (::cameraManager.isInitialized) {
             cameraManager.release()
@@ -385,6 +471,9 @@ class MainActivity : AppCompatActivity() {
         }
         if (::glRenderer.isInitialized) {
             Log.d(TAG, "Renderer FPS: ${glRenderer.getCurrentFps()}")
+        }
+        if (::webSocketStreamer.isInitialized) {
+            Log.d(TAG, "WebSocket stats: ${webSocketStreamer.getStats()}")
         }
         Log.d(TAG, "Native stats: ${NativeLib.getStats()}")
         Log.d(TAG, "==================")
