@@ -86,13 +86,13 @@ function generateGrayscalePattern() {
 
 // Connect to WebSocket server
 function connect() {
-  console.log('🔌 Connecting to WebSocket server:', WS_URL);
+  console.log(' Connecting to WebSocket server:', WS_URL);
 
   ws = new WebSocket(WS_URL);
 
   ws.on('open', () => {
-    console.log('✅ Connected to WebSocket server');
-    console.log('📡 Starting frame transmission...');
+    console.log(' Connected to WebSocket server');
+    console.log(' Starting frame transmission...');
     startSendingFrames();
   });
 
@@ -101,17 +101,17 @@ function connect() {
       const message = JSON.parse(data.toString());
       handleMessage(message);
     } catch (error) {
-      console.error('❌ Error parsing message:', error.message);
+      console.error(' Error parsing message:', error.message);
     }
   });
 
   ws.on('error', (error) => {
-    console.error('❌ WebSocket error:', error.message);
+    console.error(' WebSocket error:', error.message);
   });
 
   ws.on('close', () => {
-    console.log('👋 Disconnected from WebSocket server');
-    console.log('🔄 Reconnecting in 5 seconds...');
+    console.log(' Disconnected from WebSocket server');
+    console.log(' Reconnecting in 5 seconds...');
     setTimeout(connect, 5000);
   });
 }
@@ -120,17 +120,17 @@ function connect() {
 function handleMessage(message) {
   switch (message.type) {
     case 'connection':
-      console.log(`📡 ${message.message}`);
-      console.log(`👥 Connected clients: ${message.clientCount}`);
+      console.log(` ${message.message}`);
+      console.log(` Connected clients: ${message.clientCount}`);
       break;
     case 'pong':
-      console.log('🏓 Pong received');
+      console.log(' Pong received');
       break;
     case 'stats':
-      console.log('📊 Server stats:', message.data);
+      console.log(' Server stats:', message.data);
       break;
     default:
-      console.log('📨 Received message:', message.type);
+      console.log(' Received message:', message.type);
   }
 }
 
@@ -166,7 +166,7 @@ function sendFrame() {
   ws.send(JSON.stringify(frameData));
 
   const modeName = Object.keys(MODES).find(key => MODES[key] === mode);
-  console.log(`📤 Frame #${frameCounter} sent (${modeName} mode, ${frameData.processingTime}ms)`);
+  console.log(` Frame #${frameCounter} sent (${modeName} mode, ${frameData.processingTime}ms)`);
 }
 
 // Send ping to keep connection alive
@@ -181,7 +181,7 @@ function sendPing() {
 
 // Main execution
 console.log('='.repeat(60));
-console.log('🤖 Android Frame Simulator');
+console.log(' Android Frame Simulator');
 console.log('='.repeat(60));
 console.log(`Target: ${WS_URL}`);
 console.log(`Frame Rate: ${1000 / FRAME_INTERVAL} FPS`);
@@ -196,19 +196,19 @@ setInterval(sendPing, 30000);
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n\n👋 Shutting down simulator...');
+  console.log('\n\n Shutting down simulator...');
   if (ws) {
     ws.close(1000, 'Simulator shutting down');
   }
-  console.log('✅ Goodbye!');
+  console.log(' Goodbye!');
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
-  console.log('\n\n👋 Shutting down simulator...');
+  console.log('\n\n Shutting down simulator...');
   if (ws) {
     ws.close(1000, 'Simulator shutting down');
   }
-  console.log('✅ Goodbye!');
+  console.log(' Goodbye!');
   process.exit(0);
 });

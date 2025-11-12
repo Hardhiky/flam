@@ -231,7 +231,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔌 WebSocket Test Page</h1>
+            <h1> WebSocket Test Page</h1>
             <p class="subtitle">Edge Detector WebSocket Connection Tester</p>
         </header>
 
@@ -285,7 +285,7 @@
         </div>
 
         <div class="panel">
-            <h2>📖 Instructions</h2>
+            <h2> Instructions</h2>
             <p>1. Click <strong>Connect</strong> to establish WebSocket connection</p>
             <p>2. Use <strong>Send Ping</strong> to test connection health</p>
             <p>3. Use <strong>Request Stats</strong> to get server statistics</p>
@@ -358,14 +358,14 @@
         function connect() {
             const url = document.getElementById('ws-url').value;
 
-            log(`🔌 Connecting to ${url}...`, 'info');
+            log(` Connecting to ${url}...`, 'info');
             updateStatus('connecting', 'Connecting...');
 
             try {
                 ws = new WebSocket(url);
 
                 ws.onopen = () => {
-                    log('✅ Connected successfully!', 'success');
+                    log(' Connected successfully!', 'success');
                     updateStatus('connected', 'Connected');
                     updateButtons(true);
                     startUptime();
@@ -377,19 +377,19 @@
 
                     try {
                         const data = JSON.parse(event.data);
-                        log(`📨 Received: ${JSON.stringify(data, null, 2)}`, 'success');
+                        log(` Received: ${JSON.stringify(data, null, 2)}`, 'success');
                     } catch (e) {
-                        log(`📨 Received: ${event.data}`, 'success');
+                        log(` Received: ${event.data}`, 'success');
                     }
                 };
 
                 ws.onerror = (error) => {
-                    log('❌ WebSocket error occurred', 'error');
+                    log(' WebSocket error occurred', 'error');
                     updateStatus('disconnected', 'Error');
                 };
 
                 ws.onclose = () => {
-                    log('👋 Connection closed', 'warning');
+                    log(' Connection closed', 'warning');
                     updateStatus('disconnected', 'Disconnected');
                     updateButtons(false);
                     stopUptime();
@@ -397,21 +397,21 @@
                 };
 
             } catch (error) {
-                log(`❌ Failed to connect: ${error.message}`, 'error');
+                log(` Failed to connect: ${error.message}`, 'error');
                 updateStatus('disconnected', 'Failed');
             }
         }
 
         function disconnect() {
             if (ws) {
-                log('🔌 Disconnecting...', 'info');
+                log(' Disconnecting...', 'info');
                 ws.close();
             }
         }
 
         function sendMessage(data) {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
-                log('❌ Not connected!', 'error');
+                log(' Not connected!', 'error');
                 return;
             }
 
@@ -420,9 +420,9 @@
                 ws.send(message);
                 messagesSent++;
                 updateStats();
-                log(`📤 Sent: ${message}`, 'info');
+                log(` Sent: ${message}`, 'info');
             } catch (error) {
-                log(`❌ Failed to send: ${error.message}`, 'error');
+                log(` Failed to send: ${error.message}`, 'error');
             }
         }
 
@@ -458,18 +458,18 @@
                 const data = JSON.parse(input);
                 sendMessage(data);
             } catch (error) {
-                log(`❌ Invalid JSON: ${error.message}`, 'error');
+                log(` Invalid JSON: ${error.message}`, 'error');
             }
         }
 
         function clearLog() {
             document.getElementById('log').innerHTML = '';
-            log('🧹 Log cleared', 'info');
+            log(' Log cleared', 'info');
         }
 
         // Initialize
-        log('🚀 WebSocket Test Page Ready', 'success');
-        log('💡 Click "Connect" to start', 'info');
+        log(' WebSocket Test Page Ready', 'success');
+        log(' Click "Connect" to start', 'info');
     </script>
 </body>
 </html>

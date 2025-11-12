@@ -260,9 +260,9 @@ class EdgeDetectorWebViewer {
     type: "success" | "error" | "warning" | "info",
   ): void {
     const emoji = {
-      success: "✅",
-      error: "❌",
-      warning: "⚠️",
+      success: "",
+      error: "",
+      warning: "️",
       info: "ℹ️",
     };
 
@@ -276,13 +276,13 @@ class EdgeDetectorWebViewer {
    */
   private initializeWebSocket(): void {
     const wsUrl = "ws://localhost:8080";
-    console.log(`🔌 Connecting to WebSocket server: ${wsUrl}`);
+    console.log(` Connecting to WebSocket server: ${wsUrl}`);
 
     try {
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log("✅ WebSocket connected successfully");
+        console.log(" WebSocket connected successfully");
         this.isConnected = true;
         this.updateConnectionStatus(true);
         this.showNotification("WebSocket connected", "success");
@@ -299,13 +299,13 @@ class EdgeDetectorWebViewer {
       };
 
       this.ws.onerror = (error) => {
-        console.error("❌ WebSocket error:", error);
+        console.error(" WebSocket error:", error);
         this.updateConnectionStatus(false);
         this.showNotification("WebSocket connection error", "error");
       };
 
       this.ws.onclose = () => {
-        console.log("👋 WebSocket connection closed");
+        console.log(" WebSocket connection closed");
         this.isConnected = false;
         this.updateConnectionStatus(false);
         this.showNotification("WebSocket disconnected", "warning");
@@ -313,7 +313,7 @@ class EdgeDetectorWebViewer {
         // Attempt to reconnect after 5 seconds
         if (!this.wsReconnectInterval) {
           this.wsReconnectInterval = window.setInterval(() => {
-            console.log("🔄 Attempting to reconnect...");
+            console.log(" Attempting to reconnect...");
             this.initializeWebSocket();
           }, 5000);
         }
@@ -321,7 +321,7 @@ class EdgeDetectorWebViewer {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error("❌ Failed to create WebSocket:", errorMessage);
+      console.error(" Failed to create WebSocket:", errorMessage);
       this.showNotification("WebSocket connection failed", "error");
     }
   }
@@ -335,8 +335,8 @@ class EdgeDetectorWebViewer {
 
       switch (data.type) {
         case "connection":
-          console.log("📡 Connection established:", data.message);
-          console.log(`👥 Connected clients: ${data.clientCount}`);
+          console.log(" Connection established:", data.message);
+          console.log(` Connected clients: ${data.clientCount}`);
           break;
 
         case "frame":
@@ -349,26 +349,26 @@ class EdgeDetectorWebViewer {
               data.mode || ProcessingMode.EDGE,
             );
             console.log(
-              `🖼️ Frame #${data.frameNumber || "?"} received via WebSocket`,
+              `️ Frame #${data.frameNumber || "?"} received via WebSocket`,
             );
           }
           break;
 
         case "stats":
-          console.log("📊 Server stats:", data.data);
+          console.log(" Server stats:", data.data);
           break;
 
         case "pong":
-          console.log("🏓 Pong received");
+          console.log(" Pong received");
           break;
 
         default:
-          console.log("📨 Received WebSocket message:", data);
+          console.log(" Received WebSocket message:", data);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error("❌ Error handling WebSocket message:", errorMessage);
+      console.error(" Error handling WebSocket message:", errorMessage);
     }
   }
 
@@ -404,11 +404,11 @@ class EdgeDetectorWebViewer {
    */
   private toggleWebSocket(): void {
     if (this.isConnected && this.ws) {
-      console.log("🔌 Disconnecting WebSocket...");
+      console.log(" Disconnecting WebSocket...");
       this.ws.close();
       this.showNotification("WebSocket disconnected", "info");
     } else {
-      console.log("🔌 Connecting WebSocket...");
+      console.log(" Connecting WebSocket...");
       this.initializeWebSocket();
     }
   }
@@ -440,9 +440,9 @@ class EdgeDetectorWebViewer {
           timestamp: Date.now(),
         }),
       );
-      console.log("🏓 Ping sent");
+      console.log(" Ping sent");
     } else {
-      console.warn("⚠️ WebSocket not connected");
+      console.warn("️ WebSocket not connected");
     }
   }
 
@@ -457,9 +457,9 @@ class EdgeDetectorWebViewer {
           timestamp: Date.now(),
         }),
       );
-      console.log("📊 Stats requested");
+      console.log(" Stats requested");
     } else {
-      console.warn("⚠️ WebSocket not connected");
+      console.warn("️ WebSocket not connected");
     }
   }
 
@@ -481,14 +481,14 @@ class EdgeDetectorWebViewer {
             timestamp: Date.now(),
           }),
         );
-        console.log("📤 Test frame sent to server");
+        console.log(" Test frame sent to server");
         this.showNotification("Test frame sent", "success");
       } else {
-        console.warn("⚠️ No frame available to send");
+        console.warn("️ No frame available to send");
         this.showNotification("No frame to send", "warning");
       }
     } else {
-      console.warn("⚠️ WebSocket not connected");
+      console.warn("️ WebSocket not connected");
       this.showNotification("WebSocket not connected", "warning");
     }
   }

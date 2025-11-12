@@ -67,12 +67,12 @@ class WebSocketFrameStreamer(
         webSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 isConnecting = false
-                Log.i(TAG, "✅ WebSocket connected successfully")
+                Log.i(TAG, " WebSocket connected successfully")
                 onConnected?.invoke()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d(TAG, "📨 Received message: $text")
+                Log.d(TAG, " Received message: $text")
                 onMessageReceived?.invoke(text)
             }
 
@@ -84,7 +84,7 @@ class WebSocketFrameStreamer(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 isConnecting = false
                 this@WebSocketFrameStreamer.webSocket = null
-                Log.i(TAG, "👋 WebSocket closed: $code - $reason")
+                Log.i(TAG, " WebSocket closed: $code - $reason")
                 onDisconnected?.invoke()
 
                 // Auto-reconnect if needed
@@ -97,7 +97,7 @@ class WebSocketFrameStreamer(
                 isConnecting = false
                 this@WebSocketFrameStreamer.webSocket = null
                 val errorMsg = "WebSocket error: ${t.message}"
-                Log.e(TAG, "❌ $errorMsg", t)
+                Log.e(TAG, " $errorMsg", t)
                 onError?.invoke(errorMsg)
                 onDisconnected?.invoke()
 
@@ -115,7 +115,7 @@ class WebSocketFrameStreamer(
     private fun scheduleReconnect() {
         if (!shouldReconnect) return
 
-        Log.i(TAG, "🔄 Reconnecting in ${RECONNECT_INTERVAL_MS / 1000} seconds...")
+        Log.i(TAG, " Reconnecting in ${RECONNECT_INTERVAL_MS / 1000} seconds...")
         Thread {
             Thread.sleep(RECONNECT_INTERVAL_MS)
             if (shouldReconnect && webSocket == null && !isConnecting) {
@@ -159,7 +159,7 @@ class WebSocketFrameStreamer(
     ) {
         val ws = webSocket
         if (ws == null) {
-            Log.w(TAG, "⚠️ WebSocket not connected, skipping frame")
+            Log.w(TAG, "️ WebSocket not connected, skipping frame")
             return
         }
 
@@ -178,7 +178,7 @@ class WebSocketFrameStreamer(
             // Check size limit
             val sizeKb = imageData.length / 1024
             if (sizeKb > MAX_FRAME_SIZE_KB) {
-                Log.w(TAG, "⚠️ Frame too large: ${sizeKb}KB, skipping")
+                Log.w(TAG, "️ Frame too large: ${sizeKb}KB, skipping")
                 return
             }
 
@@ -201,9 +201,9 @@ class WebSocketFrameStreamer(
             val success = ws.send(json)
             if (success) {
                 bytesSent += json.length
-                Log.d(TAG, "📤 Frame #$frameCounter sent (${sizeKb}KB, ${processingTime}ms)")
+                Log.d(TAG, " Frame #$frameCounter sent (${sizeKb}KB, ${processingTime}ms)")
             } else {
-                Log.w(TAG, "❌ Failed to send frame #$frameCounter")
+                Log.w(TAG, " Failed to send frame #$frameCounter")
             }
 
         } catch (e: Exception) {
@@ -262,7 +262,7 @@ class WebSocketFrameStreamer(
             )
             val json = gson.toJson(pingMessage)
             ws.send(json)
-            Log.d(TAG, "🏓 Ping sent")
+            Log.d(TAG, " Ping sent")
         }
     }
 

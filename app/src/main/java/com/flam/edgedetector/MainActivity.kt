@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(
                         this,
-                        "✅ Connected to Web Viewer",
+                        " Connected to Web Viewer",
                         Toast.LENGTH_SHORT
                     ).show()
                     Log.i(TAG, "WebSocket connected - Live streaming active")
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(
                         this,
-                        "⚠️ Disconnected from Web Viewer",
+                        "️ Disconnected from Web Viewer",
                         Toast.LENGTH_SHORT
                     ).show()
                     Log.w(TAG, "WebSocket disconnected")
