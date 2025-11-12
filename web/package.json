@@ -10,7 +10,9 @@
     "start": "node server.js",
     "clean": "rm -rf dist",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test:android": "node test/simulate-android.js",
+    "test:ws": "npm run test:android"
   },
   "keywords": [
     "edge-detection",

@@ -9,6 +9,9 @@ import { FrameViewer, ProcessingMode, FrameData } from "./FrameViewer.js";
 class EdgeDetectorWebViewer {
   private frameViewer: FrameViewer;
   private isSimulationRunning: boolean = false;
+  private ws: WebSocket | null = null;
+  private wsReconnectInterval: number | null = null;
+  private isConnected: boolean = false;
 
   // UI Elements
   private btnLoadSample: HTMLButtonElement;
@@ -39,9 +42,13 @@ class EdgeDetectorWebViewer {
     // Setup keyboard shortcuts
     this.setupKeyboardShortcuts();
 
+    // Initialize WebSocket connection
+    this.initializeWebSocket();
+
     // Log initialization complete
     console.log("Edge Detector Web Viewer initialized successfully");
     console.log('Press "L" to load sample, "R" to refresh, "C" to clear');
+    console.log('Press "W" to toggle WebSocket connection');
   }
 
   /**
@@ -122,6 +129,9 @@ class EdgeDetectorWebViewer {
           break;
         case "i":
           this.printInfo();
+          break;
+        case "w":
+          this.toggleWebSocket();
           break;
       }
     });
@@ -262,51 +272,103 @@ class EdgeDetectorWebViewer {
   }
 
   /**
-   * Initialize WebSocket connection (for future implementation)
+   * Initialize WebSocket connection
    */
-  // @ts-ignore - Reserved for future use
   private initializeWebSocket(): void {
-    console.log(
-      "WebSocket initialization (placeholder for future implementation)",
-    );
-    // const ws = new WebSocket('ws://localhost:8080/stream');
-    // ws.onopen = () => console.log('WebSocket connected');
-    // ws.onmessage = (event) => this.handleWebSocketMessage(event);
-    // ws.onerror = (error) => console.error('WebSocket error:', error);
-    // ws.onclose = () => console.log('WebSocket closed');
+    const wsUrl = "ws://localhost:8080";
+    console.log(`🔌 Connecting to WebSocket server: ${wsUrl}`);
+
+    try {
+      this.ws = new WebSocket(wsUrl);
+
+      this.ws.onopen = () => {
+        console.log("✅ WebSocket connected successfully");
+        this.isConnected = true;
+        this.updateConnectionStatus(true);
+        this.showNotification("WebSocket connected", "success");
+
+        // Clear reconnect interval if it exists
+        if (this.wsReconnectInterval) {
+          clearInterval(this.wsReconnectInterval);
+          this.wsReconnectInterval = null;
+        }
+      };
+
+      this.ws.onmessage = (event) => {
+        this.handleWebSocketMessage(event);
+      };
+
+      this.ws.onerror = (error) => {
+        console.error("❌ WebSocket error:", error);
+        this.updateConnectionStatus(false);
+        this.showNotification("WebSocket connection error", "error");
+      };
+
+      this.ws.onclose = () => {
+        console.log("👋 WebSocket connection closed");
+        this.isConnected = false;
+        this.updateConnectionStatus(false);
+        this.showNotification("WebSocket disconnected", "warning");
+
+        // Attempt to reconnect after 5 seconds
+        if (!this.wsReconnectInterval) {
+          this.wsReconnectInterval = window.setInterval(() => {
+            console.log("🔄 Attempting to reconnect...");
+            this.initializeWebSocket();
+          }, 5000);
+        }
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error("❌ Failed to create WebSocket:", errorMessage);
+      this.showNotification("WebSocket connection failed", "error");
+    }
   }
 
   /**
-   * Handle WebSocket message (placeholder)
+   * Handle WebSocket message
    */
-  // @ts-ignore - Reserved for future use
   private handleWebSocketMessage(event: MessageEvent): void {
     try {
       const data = JSON.parse(event.data);
-      console.log("Received WebSocket data:", data);
 
-      // Expected format:
-      // {
-      //   imageData: "base64...",
-      //   width: 1280,
-      //   height: 720,
-      //   mode: 1,
-      //   processingTime: 25,
-      //   timestamp: 1234567890
-      // }
+      switch (data.type) {
+        case "connection":
+          console.log("📡 Connection established:", data.message);
+          console.log(`👥 Connected clients: ${data.clientCount}`);
+          break;
 
-      if (data.imageData && data.width && data.height) {
-        this.frameViewer.loadFrameFromBase64(
-          data.imageData,
-          data.width,
-          data.height,
-          data.mode || ProcessingMode.EDGE,
-        );
+        case "frame":
+          // Frame data received - display it
+          if (data.imageData && data.width && data.height) {
+            this.frameViewer.loadFrameFromBase64(
+              data.imageData,
+              data.width,
+              data.height,
+              data.mode || ProcessingMode.EDGE,
+            );
+            console.log(
+              `🖼️ Frame #${data.frameNumber || "?"} received via WebSocket`,
+            );
+          }
+          break;
+
+        case "stats":
+          console.log("📊 Server stats:", data.data);
+          break;
+
+        case "pong":
+          console.log("🏓 Pong received");
+          break;
+
+        default:
+          console.log("📨 Received WebSocket message:", data);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error("Error handling WebSocket message:", errorMessage);
+      console.error("❌ Error handling WebSocket message:", errorMessage);
     }
   }
 
@@ -336,6 +398,100 @@ class EdgeDetectorWebViewer {
       }
     }, intervalMs);
   }
+
+  /**
+   * Toggle WebSocket connection
+   */
+  private toggleWebSocket(): void {
+    if (this.isConnected && this.ws) {
+      console.log("🔌 Disconnecting WebSocket...");
+      this.ws.close();
+      this.showNotification("WebSocket disconnected", "info");
+    } else {
+      console.log("🔌 Connecting WebSocket...");
+      this.initializeWebSocket();
+    }
+  }
+
+  /**
+   * Update connection status indicator in UI
+   */
+  private updateConnectionStatus(connected: boolean): void {
+    const statusIndicator = document.getElementById("statusIndicator");
+    if (statusIndicator) {
+      if (connected) {
+        statusIndicator.classList.remove("status-inactive");
+        statusIndicator.classList.add("status-active");
+      } else {
+        statusIndicator.classList.remove("status-active");
+        statusIndicator.classList.add("status-inactive");
+      }
+    }
+  }
+
+  /**
+   * Send ping to server
+   */
+  public sendPing(): void {
+    if (this.ws && this.isConnected) {
+      this.ws.send(
+        JSON.stringify({
+          type: "ping",
+          timestamp: Date.now(),
+        }),
+      );
+      console.log("🏓 Ping sent");
+    } else {
+      console.warn("⚠️ WebSocket not connected");
+    }
+  }
+
+  /**
+   * Request stats from server
+   */
+  public requestStats(): void {
+    if (this.ws && this.isConnected) {
+      this.ws.send(
+        JSON.stringify({
+          type: "stats_request",
+          timestamp: Date.now(),
+        }),
+      );
+      console.log("📊 Stats requested");
+    } else {
+      console.warn("⚠️ WebSocket not connected");
+    }
+  }
+
+  /**
+   * Send frame data to server (for testing)
+   */
+  public sendTestFrame(): void {
+    if (this.ws && this.isConnected) {
+      const currentFrame = this.frameViewer.getCurrentFrame();
+      if (currentFrame) {
+        this.ws.send(
+          JSON.stringify({
+            type: "frame",
+            imageData: currentFrame.imageData,
+            width: currentFrame.width,
+            height: currentFrame.height,
+            mode: currentFrame.mode,
+            processingTime: currentFrame.processingTime,
+            timestamp: Date.now(),
+          }),
+        );
+        console.log("📤 Test frame sent to server");
+        this.showNotification("Test frame sent", "success");
+      } else {
+        console.warn("⚠️ No frame available to send");
+        this.showNotification("No frame to send", "warning");
+      }
+    } else {
+      console.warn("⚠️ WebSocket not connected");
+      this.showNotification("WebSocket not connected", "warning");
+    }
+  }
 }
 
 /**
@@ -356,6 +512,14 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("  S - Start simulation");
   console.log("  D - Download current frame");
   console.log("  I - Print debug info");
+  console.log("  W - Toggle WebSocket connection");
+  console.log("");
+  console.log("WebSocket methods (via console):");
+  console.log("  edgeDetectorApp.sendPing()      - Send ping to server");
+  console.log("  edgeDetectorApp.requestStats()  - Request server stats");
+  console.log(
+    "  edgeDetectorApp.sendTestFrame() - Send current frame to server",
+  );
 });
 
 /**

@@ -367,16 +367,55 @@
           🔧 Integration Notes
         </h2>
         <div class="info-section">
-          <p><strong>Current Mode:</strong> Static frame display (demo mode)</p>
           <p>
-            <strong>Future Enhancement:</strong> WebSocket connection to Android
-            app for real-time streaming
+            <strong>Current Mode:</strong> Real-time WebSocket streaming
+            (Active)
+          </p>
+          <p>
+            <strong>WebSocket Status:</strong>
+            <span class="status-indicator status-inactive" id="wsStatus"></span>
+            <span id="wsStatusText">Connecting...</span>
           </p>
           <p>
             <strong>Endpoint:</strong>
-            <code>ws://localhost:8080/stream</code> (planned)
+            <code>ws://localhost:8080</code>
           </p>
           <p><strong>Data Format:</strong> Base64-encoded RGBA images</p>
+          <p>
+            <strong>Connection:</strong> Auto-reconnect enabled (5s interval)
+          </p>
+        </div>
+        <div class="info-section" style="margin-top: 10px">
+          <h3>📱 Android Integration</h3>
+          <p>
+            <strong>REST API:</strong> POST frames to
+            <code>http://localhost:3000/api/frame</code>
+          </p>
+          <p>
+            <strong>WebSocket:</strong> Connect directly to
+            <code>ws://localhost:8080</code>
+          </p>
+          <p><strong>Message Format:</strong></p>
+          <pre
+            style="
+              background: #2d3748;
+              color: #e2e8f0;
+              padding: 10px;
+              border-radius: 4px;
+              font-size: 0.85em;
+              overflow-x: auto;
+            "
+          >
+{
+  "type": "frame",
+  "imageData": "data:image/png;base64,...",
+  "width": 1280,
+  "height": 720,
+  "mode": 1,
+  "processingTime": 25,
+  "timestamp": 1234567890
+}</pre
+          >
         </div>
       </div>
 
