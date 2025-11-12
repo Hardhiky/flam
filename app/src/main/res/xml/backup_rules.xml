@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!--
+        Backup rules for Android 12+
+        Specify what should be included/excluded from backup
+    -->
+    <include domain="sharedpref" path="." />
+    <exclude domain="sharedpref" path="device_prefs.xml" />
+</full-backup-content>

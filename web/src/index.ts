@@ -1,7 +1,7 @@
 /**
  * Main TypeScript entry point for Edge Detector Web Viewer
  */
-import { FrameViewer, ProcessingMode, FrameData } from "./FrameViewer";
+import { FrameViewer, ProcessingMode, FrameData } from "./FrameViewer.js";
 
 /**
  * Main application class

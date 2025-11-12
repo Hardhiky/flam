@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Edge Detector Viewer</string>
+
+    <!-- Main Activity -->
+    <string name="camera_permission_required">Camera permission is required to use this app</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="camera_error">Camera initialization failed</string>
+
+    <!-- Toggle Buttons -->
+    <string name="toggle_mode">Toggle Mode</string>
+    <string name="mode_raw">RAW</string>
+    <string name="mode_edge">EDGE</string>
+    <string name="mode_grayscale">GRAY</string>
+
+    <!-- FPS Counter -->
+    <string name="fps_label">FPS: %1$s</string>
+    <string name="processing_time_label">Processing: %1$dms</string>
+
+    <!-- OpenCV -->
+    <string name="opencv_init_success">OpenCV initialized successfully</string>
+    <string name="opencv_init_failed">OpenCV initialization failed</string>
+    <string name="opencv_not_available">OpenCV not available - using fallback processing</string>
+
+    <!-- OpenGL -->
+    <string name="opengl_init_success">OpenGL ES initialized</string>
+    <string name="opengl_init_failed">OpenGL ES initialization failed</string>
+
+    <!-- Error Messages -->
+    <string name="error_camera_unavailable">Camera is not available on this device</string>
+    <string name="error_opengl_unsupported">OpenGL ES 2.0 is not supported on this device</string>
+    <string name="error_native_lib_load">Failed to load native library</string>
+
+    <!-- Info -->
+    <string name="resolution_label">Resolution: %1$dx%2$d</string>
+    <string name="processing_mode_label">Mode: %1$s</string>
+</resources>

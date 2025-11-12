@@ -1,367 +1,391 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Edge Detector Web Viewer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            min-height: 100vh;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        min-height: 100vh;
+        padding: 20px;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
 
-        .subtitle {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
+      .subtitle {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
 
+      .main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 768px) {
         .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+          grid-template-columns: 1fr;
         }
+      }
 
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
+      .viewer-card {
+        text-align: center;
+      }
 
-        .viewer-card {
-            text-align: center;
-        }
+      .frame-container {
+        position: relative;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 20px 0;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .frame-container {
-            position: relative;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 20px 0;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+      #frameDisplay {
+        max-width: 100%;
+        max-height: 600px;
+        height: auto;
+        display: block;
+      }
 
-        #frameDisplay {
-            max-width: 100%;
-            max-height: 600px;
-            height: auto;
-            display: block;
-        }
+      .placeholder {
+        color: #888;
+        font-size: 1.2em;
+      }
 
-        .placeholder {
-            color: #888;
-            font-size: 1.2em;
-        }
+      .stats-card h2,
+      .viewer-card h2 {
+        margin-bottom: 15px;
+        color: #667eea;
+        font-size: 1.5em;
+      }
 
-        .stats-card h2,
-        .viewer-card h2 {
-            margin-bottom: 15px;
-            color: #667eea;
-            font-size: 1.5em;
-        }
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        margin: 8px 0;
+        background: #f7f9fc;
+        border-radius: 6px;
+        border-left: 4px solid #667eea;
+      }
 
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            margin: 8px 0;
-            background: #f7f9fc;
-            border-radius: 6px;
-            border-left: 4px solid #667eea;
-        }
+      .stat-label {
+        font-weight: 600;
+        color: #555;
+      }
 
-        .stat-label {
-            font-weight: 600;
-            color: #555;
-        }
+      .stat-value {
+        font-family: "Courier New", monospace;
+        color: #667eea;
+        font-weight: bold;
+      }
 
-        .stat-value {
-            font-family: 'Courier New', monospace;
-            color: #667eea;
-            font-weight: bold;
-        }
+      .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
+      button {
+        padding: 12px 24px;
+        font-size: 1em;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
 
-        button {
-            padding: 12px 24px;
-            font-size: 1em;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
+      .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
 
-        .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
+      .btn-secondary {
+        background: #48bb78;
+        color: white;
+      }
 
-        .btn-secondary {
-            background: #48bb78;
-            color: white;
-        }
+      .btn-secondary:hover {
+        background: #38a169;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+      }
 
-        .btn-secondary:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
-        }
+      .btn-danger {
+        background: #f56565;
+        color: white;
+      }
 
-        .btn-danger {
-            background: #f56565;
-            color: white;
-        }
+      .btn-danger:hover {
+        background: #e53e3e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+      }
 
-        .btn-danger:hover {
-            background: #e53e3e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
-        }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+      }
 
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
+      .status-active {
+        background: #48bb78;
+      }
 
-        .status-active {
-            background: #48bb78;
-        }
+      .status-inactive {
+        background: #cbd5e0;
+        animation: none;
+      }
 
-        .status-inactive {
-            background: #cbd5e0;
-            animation: none;
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
         }
+        50% {
+          opacity: 0.5;
+        }
+      }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
+      .info-section {
+        background: #edf2f7;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
 
-        .info-section {
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
+      .info-section h3 {
+        color: #2d3748;
+        margin-bottom: 10px;
+      }
 
-        .info-section h3 {
-            color: #2d3748;
-            margin-bottom: 10px;
-        }
+      .info-section p {
+        color: #4a5568;
+        line-height: 1.6;
+        margin: 5px 0;
+      }
 
-        .info-section p {
-            color: #4a5568;
-            line-height: 1.6;
-            margin: 5px 0;
-        }
+      footer {
+        text-align: center;
+        color: white;
+        margin-top: 30px;
+        opacity: 0.8;
+      }
 
-        footer {
-            text-align: center;
-            color: white;
-            margin-top: 30px;
-            opacity: 0.8;
-        }
+      .mode-badges {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 15px 0;
+      }
 
-        .mode-badges {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 15px 0;
-        }
+      .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+      }
 
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
+      .badge-raw {
+        background: #e2e8f0;
+        color: #2d3748;
+      }
 
-        .badge-raw {
-            background: #e2e8f0;
-            color: #2d3748;
-        }
+      .badge-edge {
+        background: #bee3f8;
+        color: #2c5282;
+      }
 
-        .badge-edge {
-            background: #bee3f8;
-            color: #2c5282;
-        }
+      .badge-gray {
+        background: #e6fffa;
+        color: #234e52;
+      }
 
-        .badge-gray {
-            background: #e6fffa;
-            color: #234e52;
-        }
-
-        .timestamp {
-            font-size: 0.85em;
-            color: #718096;
-            text-align: center;
-            margin-top: 10px;
-        }
+      .timestamp {
+        font-size: 0.85em;
+        color: #718096;
+        text-align: center;
+        margin-top: 10px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <h1>🧪 Edge Detector Web Viewer</h1>
-            <p class="subtitle">Real-time Image Processing Debug Tool</p>
-        </header>
+      <header>
+        <h1>🧪 Edge Detector Web Viewer</h1>
+        <p class="subtitle">Real-time Image Processing Debug Tool</p>
+      </header>
 
-        <div class="main-content">
-            <!-- Frame Viewer -->
-            <div class="card viewer-card">
-                <h2>
-                    <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                    Frame Display
-                </h2>
+      <div class="main-content">
+        <!-- Frame Viewer -->
+        <div class="card viewer-card">
+          <h2>
+            <span
+              class="status-indicator status-inactive"
+              id="statusIndicator"
+            ></span>
+            Frame Display
+          </h2>
 
-                <div class="frame-container" id="frameContainer">
-                    <img id="frameDisplay" style="display: none;" alt="Processed Frame">
-                    <div class="placeholder" id="placeholder">
-                        No frame loaded. Click "Load Sample Frame" to begin.
-                    </div>
-                </div>
-
-                <div class="mode-badges" id="modeBadges">
-                    <span class="badge badge-raw">RAW</span>
-                    <span class="badge badge-edge">EDGE DETECTION</span>
-                    <span class="badge badge-gray">GRAYSCALE</span>
-                </div>
-
-                <div class="timestamp" id="timestamp"></div>
-
-                <div class="controls">
-                    <button class="btn-primary" id="btnLoadSample">Load Sample Frame</button>
-                    <button class="btn-secondary" id="btnRefresh">Refresh</button>
-                    <button class="btn-danger" id="btnClear">Clear</button>
-                </div>
+          <div class="frame-container" id="frameContainer">
+            <img
+              id="frameDisplay"
+              style="display: none"
+              alt="Processed Frame"
+            />
+            <div class="placeholder" id="placeholder">
+              No frame loaded. Click "Load Sample Frame" to begin.
             </div>
+          </div>
 
-            <!-- Stats Panel -->
-            <div class="card stats-card">
-                <h2>📊 Frame Statistics</h2>
+          <div class="mode-badges" id="modeBadges">
+            <span class="badge badge-raw">RAW</span>
+            <span class="badge badge-edge">EDGE DETECTION</span>
+            <span class="badge badge-gray">GRAYSCALE</span>
+          </div>
 
-                <div class="stat-item">
-                    <span class="stat-label">FPS</span>
-                    <span class="stat-value" id="statFps">0</span>
-                </div>
+          <div class="timestamp" id="timestamp"></div>
 
-                <div class="stat-item">
-                    <span class="stat-label">Resolution</span>
-                    <span class="stat-value" id="statResolution">N/A</span>
-                </div>
-
-                <div class="stat-item">
-                    <span class="stat-label">Processing Time</span>
-                    <span class="stat-value" id="statProcessingTime">0 ms</span>
-                </div>
-
-                <div class="stat-item">
-                    <span class="stat-label">Mode</span>
-                    <span class="stat-value" id="statMode">EDGE</span>
-                </div>
-
-                <div class="stat-item">
-                    <span class="stat-label">Frames Processed</span>
-                    <span class="stat-value" id="statFrameCount">0</span>
-                </div>
-
-                <div class="stat-item">
-                    <span class="stat-label">Data Size</span>
-                    <span class="stat-value" id="statDataSize">0 KB</span>
-                </div>
-
-                <div class="info-section">
-                    <h3>ℹ️ About</h3>
-                    <p>This web viewer displays processed frames from the Android Edge Detection application.</p>
-                    <p><strong>Tech Stack:</strong> TypeScript, HTML5, CSS3</p>
-                    <p><strong>Features:</strong> Real-time display, FPS tracking, Multiple processing modes</p>
-                </div>
-            </div>
+          <div class="controls">
+            <button class="btn-primary" id="btnLoadSample">
+              Load Sample Frame
+            </button>
+            <button class="btn-secondary" id="btnRefresh">Refresh</button>
+            <button class="btn-danger" id="btnClear">Clear</button>
+          </div>
         </div>
 
-        <div class="card">
-            <h2 style="color: #667eea; margin-bottom: 15px;">🔧 Integration Notes</h2>
-            <div class="info-section">
-                <p><strong>Current Mode:</strong> Static frame display (demo mode)</p>
-                <p><strong>Future Enhancement:</strong> WebSocket connection to Android app for real-time streaming</p>
-                <p><strong>Endpoint:</strong> <code>ws://localhost:8080/stream</code> (planned)</p>
-                <p><strong>Data Format:</strong> Base64-encoded RGBA images</p>
-            </div>
-        </div>
+        <!-- Stats Panel -->
+        <div class="card stats-card">
+          <h2>📊 Frame Statistics</h2>
 
-        <footer>
-            <p>&copy; 2024 Edge Detector Project | RnD Intern Assessment</p>
-            <p>Built with ❤️ using TypeScript + Android + OpenCV + OpenGL ES</p>
-        </footer>
+          <div class="stat-item">
+            <span class="stat-label">FPS</span>
+            <span class="stat-value" id="statFps">0</span>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-label">Resolution</span>
+            <span class="stat-value" id="statResolution">N/A</span>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-label">Processing Time</span>
+            <span class="stat-value" id="statProcessingTime">0 ms</span>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-label">Mode</span>
+            <span class="stat-value" id="statMode">EDGE</span>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-label">Frames Processed</span>
+            <span class="stat-value" id="statFrameCount">0</span>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-label">Data Size</span>
+            <span class="stat-value" id="statDataSize">0 KB</span>
+          </div>
+
+          <div class="info-section">
+            <h3>ℹ️ About</h3>
+            <p>
+              This web viewer displays processed frames from the Android Edge
+              Detection application.
+            </p>
+            <p><strong>Tech Stack:</strong> TypeScript, HTML5, CSS3</p>
+            <p>
+              <strong>Features:</strong> Real-time display, FPS tracking,
+              Multiple processing modes
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="color: #667eea; margin-bottom: 15px">
+          🔧 Integration Notes
+        </h2>
+        <div class="info-section">
+          <p><strong>Current Mode:</strong> Static frame display (demo mode)</p>
+          <p>
+            <strong>Future Enhancement:</strong> WebSocket connection to Android
+            app for real-time streaming
+          </p>
+          <p>
+            <strong>Endpoint:</strong>
+            <code>ws://localhost:8080/stream</code> (planned)
+          </p>
+          <p><strong>Data Format:</strong> Base64-encoded RGBA images</p>
+        </div>
+      </div>
+
+      <footer>
+        <p>&copy; 2024 Edge Detector Project | RnD Intern Assessment</p>
+        <p>Built with ❤️ using TypeScript + Android + OpenCV + OpenGL ES</p>
+      </footer>
     </div>
 
-    <script src="../dist/index.js"></script>
-</body>
+    <script type="module" src="../dist/index.js"></script>
+  </body>
 </html>
